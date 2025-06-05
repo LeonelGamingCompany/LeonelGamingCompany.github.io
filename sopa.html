@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>LeonelGamingCompany - Word Search</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="manifest.json">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #4f8cff 0%, #a6ffcb 100%);
+            min-height: 100vh;
+            height: 100vh;
+            margin: 0;
+            color: #222;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            overflow: hidden;
+            font-size: 0.95em;
+        }
+        header {
+            background: rgba(255,255,255,0.9);
+            width: 100%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            padding: 14px 0 6px 0;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        h1 {
+            margin: 0;
+            font-size: 2.1em;
+            letter-spacing: 2px;
+            color: #2d5be3;
+        }
+        .main-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+        }
+        #sopa {
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            padding: 10px 10px 10px 10px;
+            max-width: 90vw;
+            max-height: 80vh;
+            overflow: hidden;
+            margin-right: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        table {
+            margin: 0 auto;
+            border-collapse: collapse;
+            background: transparent;
+        }
+        td {
+            width: 40px; height: 40px;
+            border: 2px solid #2d5be3;
+            font-size: 1.5em;
+            font-weight: bold;
+            text-align: center;
+            background: #eaf1ff;
+            color: #2d5be3;
+            transition: background 0.2s;
+            cursor: pointer;
+            border-radius: 6px;
+            user-select: none;
+        }
+        td.selected {
+            background: #a6ffcb;
+            color: #222;
+        }
+        td.found {
+            background: #ffe066;
+            color: #222;
+        }
+        td:hover {
+            background: #a6ffcb;
+            color: #222;
+        }
+        .word-list {
+            background: rgba(255,255,255,0.85);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 18px 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            font-size: 1.3em;
+            min-width: 200px;
+            margin-top: 0;
+            max-height: 80vh;
+            overflow: hidden;
+        }
+        .word-list-title {
+            font-weight: bold;
+            margin-bottom: 14px;
+            color: #2d5be3;
+            font-size: 1em;
+        }
+        .word-list span {
+            display: block;
+            margin-bottom: 8px;
+            cursor: default;
+            transition: color 0.2s;
+        }
+        .word-list .found {
+            text-decoration: line-through;
+            color: #aaa;
+        }
+        @media (max-width: 900px) {
+            .main-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            #sopa {
+                margin-right: 0;
+                margin-bottom: 20px;
+                max-height: 50vh;
+            }
+            .word-list {
+                align-items: center;
+                max-height: 30vh;
+                min-width: 140px;
+                padding: 10px 8px;
+                font-size: 1em;
+            }
+        }
+        @media (max-width: 600px) {
+            td { width: 22px; height: 22px; font-size: 0.85em; }
+            h1 { font-size: 1em; }
+            .word-list { padding: 6px 6px; min-width: 80px; font-size: 0.85em; }
+            #sopa { max-height: 250vh; }
+        }
+        .button-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            margin-top: 12px;
+        }
+        button {
+            padding: 10px 22px;
+            font-size: 1em;
+            background: #2d5be3;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #1b3e7a;
+        }
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+            padding: 32px 28px 24px 28px;
+            text-align: center;
+            min-width: 260px;
+            max-width: 90vw;
+        }
+        .modal-content h2 {
+            margin-top: 0;
+            color: #2d5be3;
+            font-size: 1.5em;
+        }
+        .modal-content button {
+            margin: 14px 10px 0 10px;
+            display: inline-block;
+            min-width: 100px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Sopa de Letras</h1>
+    </header>
+    <div class="main-container">
+        <div id="sopa"></div>
+        <div class="word-list" id="palabras">
+            <div class="word-list-title">Palabras a buscar:</div>
+        </div>
+    </div>
+    <div class="button-group">
+        <button onclick="generarSopa()">Nueva Sopa</button>
+        <button onclick="volverIndex()">Volver</button>
+    </div>
+    <div id="modal-completado" style="display:none;"></div>
+    <script>
+        const palabras = ["GATO", "PERRO", "SOL", "LUNA", "JUEGO", "AGUA", "FUEGO", "TIERRA", "AIRE", "LEON"];
+        const N = 12;
+        let matriz = [];
+        let palabrasMezcladas = [];
+        let palabrasEncontradas = [];
+        let seleccion = [];
+        let mouseDown = false;
+        let seleccionInicial = null;
+        let ultimaCelda = null;
+
+        function crearMatriz(n) {
+            return Array.from({length: n}, () => Array(n).fill(''));
+        }
+
+        function colocarPalabra(matriz, palabra) {
+            const direcciones = [
+                [0, 1],   // derecha
+                [1, 0],   // abajo
+                [1, 1],   // diagonal abajo-derecha
+                [-1, 1],  // diagonal arriba-derecha
+            ];
+            let colocado = false;
+            let intentos = 0;
+            while (!colocado && intentos < 100) {
+                const dir = direcciones[Math.floor(Math.random() * direcciones.length)];
+                const fila = Math.floor(Math.random() * N);
+                const col = Math.floor(Math.random() * N);
+                let puedeColocar = true;
+                for (let i = 0; i < palabra.length; i++) {
+                    const x = fila + dir[0] * i;
+                    const y = col + dir[1] * i;
+                    if (x < 0 || x >= N || y < 0 || y >= N) {
+                        puedeColocar = false;
+                        break;
+                    }
+                    if (matriz[x][y] !== '' && matriz[x][y] !== palabra[i]) {
+                        puedeColocar = false;
+                        break;
+                    }
+                }
+                if (puedeColocar) {
+                    for (let i = 0; i < palabra.length; i++) {
+                        const x = fila + dir[0] * i;
+                        const y = col + dir[1] * i;
+                        matriz[x][y] = palabra[i];
+                    }
+                    colocado = true;
+                }
+                intentos++;
+            }
+        }
+
+        function rellenarMatriz(matriz) {
+            const letras = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ";
+            for (let i = 0; i < N; i++) {
+                for (let j = 0; j < N; j++) {
+                    if (matriz[i][j] === '') {
+                        matriz[i][j] = letras[Math.floor(Math.random() * letras.length)];
+                    }
+                }
+            }
+        }
+
+        function mostrarSopa(matriz) {
+            let html = '<table>';
+            for (let i = 0; i < N; i++) {
+                html += '<tr>';
+                for (let j = 0; j < N; j++) {
+                    html += `<td data-x="${i}" data-y="${j}">${matriz[i][j]}</td>`;
+                }
+                html += '</tr>';
+            }
+            html += '</table>';
+            document.getElementById('sopa').innerHTML = html;
+            agregarEventosCeldas();
+        }
+
+        function mostrarPalabras(palabras) {
+            let html = '<div class="word-list-title">Palabras a buscar:</div>';
+            html += palabras.map(p => `<span class="${palabrasEncontradas.includes(p) ? 'found' : ''}" data-palabra="${p}">${p}</span>`).join("");
+            document.getElementById('palabras').innerHTML = html;
+        }
+
+        function generarSopa() {
+            matriz = crearMatriz(N);
+            palabrasMezcladas = palabras.slice().sort(() => Math.random() - 0.5);
+            palabrasEncontradas = [];
+            seleccion = [];
+            seleccionInicial = null;
+            ultimaCelda = null;
+            palabrasMezcladas.forEach(palabra => colocarPalabra(matriz, palabra));
+            rellenarMatriz(matriz);
+            mostrarSopa(matriz);
+            mostrarPalabras(palabrasMezcladas);
+            ocultarModal();
+        }
+
+        function agregarEventosCeldas() {
+            const celdas = document.querySelectorAll('#sopa td');
+            celdas.forEach(td => {
+                td.addEventListener('mousedown', e => {
+                    e.preventDefault();
+                    mouseDown = true;
+                    limpiarSeleccion();
+                    seleccionarCelda(td, true);
+                });
+                td.addEventListener('mouseenter', e => {
+                    if (mouseDown) {
+                        seleccionarCelda(td, false);
+                    }
+                });
+                td.addEventListener('mouseup', e => {
+                    mouseDown = false;
+                    verificarSeleccion();
+                });
+                td.addEventListener('mouseleave', e => {
+                    if (mouseDown) {
+                        desmarcarHasta(td);
+                    }
+                });
+                td.addEventListener('touchstart', e => {
+                    e.preventDefault();
+                    mouseDown = true;
+                    limpiarSeleccion();
+                    seleccionarCelda(td, true);
+                }, {passive: false});
+                td.addEventListener('touchmove', e => {
+                    e.preventDefault();
+                    let touch = e.touches[0];
+                    let elem = document.elementFromPoint(touch.clientX, touch.clientY);
+                    if (elem && elem.tagName === 'TD') {
+                        seleccionarCelda(elem, false);
+                    }
+                }, {passive: false});
+                td.addEventListener('touchend', e => {
+                    mouseDown = false;
+                    verificarSeleccion();
+                });
+            });
+            document.body.addEventListener('mouseup', () => { mouseDown = false; limpiarSeleccion(); });
+            document.body.addEventListener('touchend', () => { mouseDown = false; limpiarSeleccion(); });
+        }
+
+        function seleccionarCelda(td, esInicio) {
+            const x = parseInt(td.getAttribute('data-x'));
+            const y = parseInt(td.getAttribute('data-y'));
+            if (esInicio) {
+                seleccion = [[x, y]];
+                seleccionInicial = [x, y];
+                ultimaCelda = [x, y];
+                limpiarSeleccion();
+                td.classList.add('selected');
+            } else if (seleccionInicial) {
+                limpiarSeleccion();
+                let camino = obtenerCamino(seleccionInicial, [x, y]);
+                seleccion = camino;
+                camino.forEach(pos => {
+                    document.querySelector(`#sopa td[data-x="${pos[0]}"][data-y="${pos[1]}"]`).classList.add('selected');
+                });
+                ultimaCelda = [x, y];
+            }
+        }
+
+        function limpiarSeleccion() {
+            document.querySelectorAll('#sopa td.selected').forEach(td => td.classList.remove('selected'));
+            seleccion = [];
+        }
+
+        function verificarSeleccion() {
+            if (seleccion.length < 2) {
+                limpiarSeleccion();
+                seleccionInicial = null;
+                ultimaCelda = null;
+                return;
+            }
+            let palabra = "";
+            for (let pos of seleccion) {
+                palabra += matriz[pos[0]][pos[1]];
+            }
+            let palabraInv = palabra.split('').reverse().join('');
+            let encontrada = null;
+            for (let p of palabrasMezcladas) {
+                if (palabra === p || palabraInv === p) {
+                    encontrada = p;
+                    break;
+                }
+            }
+            if (encontrada && !palabrasEncontradas.includes(encontrada)) {
+                palabrasEncontradas.push(encontrada);
+                seleccion.forEach(pos => {
+                    document.querySelector(`#sopa td[data-x="${pos[0]}"][data-y="${pos[1]}"]`).classList.add('found');
+                });
+                mostrarPalabras(palabrasMezcladas);
+                // Verificar si ya se encontraron todas
+                if (palabrasEncontradas.length === palabrasMezcladas.length) {
+                    setTimeout(mostrarModalCompletado, 400);
+                }
+            }
+            setTimeout(() => {
+                limpiarSeleccion();
+                seleccionInicial = null;
+                ultimaCelda = null;
+            }, 200);
+        }
+
+        function obtenerCamino(inicio, fin) {
+            let [x0, y0] = inicio;
+            let [x1, y1] = fin;
+            let dx = x1 - x0;
+            let dy = y1 - y0;
+            let len = Math.max(Math.abs(dx), Math.abs(dy));
+            if (len === 0) return [[x0, y0]];
+            let stepx = dx === 0 ? 0 : dx / Math.abs(dx);
+            let stepy = dy === 0 ? 0 : dy / Math.abs(dy);
+            if (
+                (stepx === 0 && stepy !== 0) ||
+                (stepx !== 0 && stepy === 0) ||
+                (Math.abs(dx) === Math.abs(dy) && stepx !== 0 && stepy !== 0)
+            ) {
+                let camino = [];
+                for (let i = 0; i <= len; i++) {
+                    camino.push([x0 + stepx * i, y0 + stepy * i]);
+                }
+                return camino;
+            }
+            return [[x0, y0]];
+        }
+
+        function desmarcarHasta(td) {
+            if (!seleccionInicial) return;
+            const x = parseInt(td.getAttribute('data-x'));
+            const y = parseInt(td.getAttribute('data-y'));
+            let camino = obtenerCamino(seleccionInicial, [x, y]);
+            limpiarSeleccion();
+            seleccion = camino;
+            camino.forEach(pos => {
+                document.querySelector(`#sopa td[data-x="${pos[0]}"][data-y="${pos[1]}"]`).classList.add('selected');
+            });
+            ultimaCelda = [x, y];
+        }
+
+        // Modal functions
+        function mostrarModalCompletado() {
+            const modal = document.getElementById('modal-completado');
+            modal.innerHTML = `
+                <div class="modal-overlay">
+                    <div class="modal-content">
+                        <h2>¡Sopa de letras completada!</h2>
+                        <button onclick="generarSopa()">De Nuevo</button>
+                        <button onclick="volverIndex()">Volver</button>
+                    </div>
+                </div>
+            `;
+            modal.style.display = 'block';
+        }
+        function ocultarModal() {
+            const modal = document.getElementById('modal-completado');
+            modal.style.display = 'none';
+            modal.innerHTML = '';
+        }
+        function volverIndex() {
+            window.location.href = "index.html";
+        }
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js');
+            });
+        }
+
+        generarSopa();
+    </script>
+</body>
+</html>
