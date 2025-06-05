@@ -20,6 +20,7 @@
             min-height: 100vh;
         }
         .app-bar {
+            position: relative;
             background: #23272f;
             padding: 18px 0;
             text-align: center;
@@ -33,6 +34,82 @@
             text-fill-color: transparent;
             text-shadow: 0 4px 24px rgba(255, 152, 0, 0.25), 0 1px 0 #fff2;
             margin-bottom: 10px;
+        }
+        .menu-btn {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            z-index: 1001;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .menu-icon {
+            width: 32px;
+            height: 32px;
+            display: block;
+        }
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 240px;
+            background: #23272f;
+            box-shadow: 2px 0 16px rgba(0,0,0,0.25);
+            transform: translateX(-100%);
+            transition: transform 0.25s cubic-bezier(.4,0,.2,1);
+            z-index: 1000;
+            padding-top: 70px;
+        }
+        .sidebar.open {
+            transform: translateX(0);
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar li {
+            margin: 0;
+        }
+        .sidebar a {
+            display: block;
+            padding: 18px 28px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.2rem;
+            border-bottom: 1px solid #23272f;
+            transition: background 0.15s;
+        }
+        .sidebar a:hover {
+            background: #181a20;
+        }
+        .sidebar .close-btn {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.35);
+            z-index: 999;
+        }
+        .sidebar.open ~ .sidebar-backdrop {
+            display: block;
         }
         .games-title {
             margin: 38px auto 10px auto;
@@ -111,11 +188,33 @@
                 width: 100%;
                 height: 120px;
             }
+            .sidebar {
+                width: 80vw;
+                min-width: 180px;
+                max-width: 320px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="app-bar">LeonelGamingCompany</div>
+    <div class="app-bar">
+        <button class="menu-btn" id="menu-btn" aria-label="Abrir menú">
+            <svg class="menu-icon" viewBox="0 0 32 32">
+                <rect y="6" width="32" height="4" rx="2" fill="#fff"/>
+                <rect y="14" width="32" height="4" rx="2" fill="#fff"/>
+                <rect y="22" width="32" height="4" rx="2" fill="#fff"/>
+            </svg>
+        </button>
+        LeonelGamingCompany
+    </div>
+    <nav class="sidebar" id="sidebar" aria-label="Menú lateral">
+        <button class="close-btn" id="close-sidebar" aria-label="Cerrar menú">&times;</button>
+        <ul>
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="chat-global.html">Chat Global</a></li>
+        </ul>
+    </nav>
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
     <div class="games-title">¡Descubre nuestros juegos!</div>
     <div class="games-grid">
         <div class="game-card">
@@ -132,17 +231,41 @@
         </div>
     </div>
     <script>
-        // Cambia de página a tetris.html sin abrir una nueva pestaña
+        // Sidebar toggle logic
+        const menuBtn = document.getElementById('menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        const closeSidebar = document.getElementById('close-sidebar');
+        const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+
+        function openSidebar() {
+            sidebar.classList.add('open');
+            sidebarBackdrop.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+        function closeSidebarFunc() {
+            sidebar.classList.remove('open');
+            sidebarBackdrop.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+
+        menuBtn.addEventListener('click', openSidebar);
+        closeSidebar.addEventListener('click', closeSidebarFunc);
+        sidebarBackdrop.addEventListener('click', closeSidebarFunc);
+
+        // Cierra el sidebar con ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeSidebarFunc();
+        });
+
+        // Navegación de juegos
         document.getElementById('tetris-btn').addEventListener('click', function(e) {
             e.preventDefault();
             window.location.href = 'tetris.html';
         });
-        // Cambia de página a sopa.html sin abrir una nueva pestaña
         document.getElementById('wordsearch-btn').addEventListener('click', function(e) {
             e.preventDefault();
             window.location.href = 'sopa.html';
         });
-        // Cambia de página a flappy.html sin abrir una nueva pestaña
         document.getElementById('flappy-btn').addEventListener('click', function(e) {
             e.preventDefault();
             window.location.href = 'flappy.html';
